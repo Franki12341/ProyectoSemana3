@@ -6,7 +6,9 @@ $precio = $_POST['precio'] ?? "";
 $total = "";
 
 if (isset($_POST['calcular'])) {
-    $total = $cantidad * $precio;
+    if ($cantidad > 0 && $precio > 0) {
+        $total = $cantidad * $precio;
+    }
 }
 ?>
 
@@ -22,14 +24,19 @@ if (isset($_POST['calcular'])) {
 
         .contenedor {
             width: 350px;
-            margin: 80px auto;
+            margin: 40px auto;
             background: white;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0px 0px 10px #ccc;
         }
 
-        h2 {
+        .tabla {
+            width: 90%;
+            margin: 20px auto;
+        }
+
+        h2, h3 {
             text-align: center;
         }
 
@@ -45,6 +52,16 @@ if (isset($_POST['calcular'])) {
             margin-top: 5px;
             cursor: pointer;
         }
+
+        table {
+            background: white;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -54,16 +71,16 @@ if (isset($_POST['calcular'])) {
 
     <form method="POST">
         Cliente:
-        <input type="text" name="cliente" value="<?php echo $cliente; ?>">
+        <input type="text" name="cliente" value="<?php echo $cliente; ?>" required>
 
         Producto:
-        <input type="text" name="producto" value="<?php echo $producto; ?>">
+        <input type="text" name="producto" value="<?php echo $producto; ?>" required>
 
         Cantidad:
-        <input type="number" name="cantidad" value="<?php echo $cantidad; ?>" min="1">
+        <input type="number" name="cantidad" value="<?php echo $cantidad; ?>" min="1" required>
 
         Precio:
-        <input type="number" step="0.01" name="precio" value="<?php echo $precio; ?>" min="0.01">
+        <input type="number" step="0.01" name="precio" value="<?php echo $precio; ?>" min="0.01" required>   
 
         Total:
         <input type="text" value="<?php echo $total; ?>" readonly>
@@ -80,6 +97,48 @@ if (isset($_POST['calcular'])) {
 
         <button type="submit">Guardar Venta</button>
     </form>
+</div>
+
+<?php
+include("conexion.php");
+
+$resultado = $conn->query("SELECT * FROM ventas");
+?>
+
+<div class="tabla">
+    <h3>Lista de Ventas</h3>
+
+    <table border="1" width="100%">
+        <tr>
+            <th>ID</th>
+            <th>Cliente</th>
+            <th>Producto</th>
+            <th>Cantidad</th>
+            <th>Precio</th>
+            <th>Total</th>
+            <th>Acciones</th>
+        </tr>
+
+        <?php if($resultado && $resultado->num_rows > 0): ?>
+            <?php while($row = $resultado->fetch_assoc()): ?>
+            <tr>
+                <td><?php echo $row['id']; ?></td>
+                <td><?php echo $row['cliente']; ?></td>
+                <td><?php echo $row['producto']; ?></td>
+                <td><?php echo $row['cantidad']; ?></td>
+                <td><?php echo $row['precio']; ?></td>
+                <td><?php echo $row['total']; ?></td>
+                <td>
+                    <a href="editar.php?id=<?php echo $row['id']; ?>">Editar</a>
+                </td>
+            </tr>
+            <?php endwhile; ?>
+        <?php else: ?>
+            <tr>
+                <td colspan="7">No hay registros</td>
+            </tr>
+        <?php endif; ?>
+    </table>
 </div>
 
 </body>
